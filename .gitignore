@@ -1,0 +1,9 @@
+/.idea
+/AppFastApi/.idea
+/certificates/example
+/signed
+/no_signed
+/unsigned
+/test
+/example_http
+/AppFastApi/scripts

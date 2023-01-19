@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#trap 'echo "# $BASH_COMMAND";read' DEBUG
+
+sleep 1
+# shellcheck disable=SC2046
+# shellcheck disable=SC2005
+# shellcheck disable=SC2006
+result=`python3 signed_data.py "$1"`
+# shellcheck disable=SC1046
+if [ "$result" != 0 ]; then
+echo "$result"
+fi
+
+
+
+
