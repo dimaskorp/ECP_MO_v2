@@ -42,7 +42,7 @@ docker build --tag cryptopro_5 .
 Запустим контейнер под именем `cryptopro`, к которому будем обращаться в примерах:
 
 ```shell
-docker run -it --rm -p 8095:80 --name cryptopro cryptopro_5
+docker run -it -p 8095:80 --name cryptopro cryptopro_5
 ```
 
 # Работа с контейнером через интерфейс командной строки<a name="cli"></a>
@@ -87,11 +87,11 @@ docker exec -i cryptopro certmgr -inst -all -store uroot -file /certificates/<na
 
 Скопировать приватный ключ в хранилище (контейнер), где <username> - имя пользователя linux:
 ```shell
-docker exec -i cryptopro cp -R /path/to/key/999996.000 /var/opt/cprocsp/keys/<username>/
+docker exec -i cryptopro cp -R /certificates/ecp/999996.000 /var/opt/cprocsp/keys/root
 ```
 Поставить «минимальные» права:
 ```shell
-docker exec -i cryptopro chmod 766 /var/opt/cprocsp/keys/<username>/999996.000/*
+docker exec -i cryptopro chmod 766 /var/opt/cprocsp/keys/root/999996.000/*
 ```
 Узнать реальное название контейнера:
 ```shell
@@ -99,7 +99,7 @@ docker exec -i cryptopro csptest -keyset -enum_cont -verifycontext -fqcn
 ```
 Ассоциировать сертификат с контейнером, сертификат попадет в пользовательское хранилище My:
 ```shell
-docker exec -i cryptopro certmgr -inst -file /path/to/file/client.cer -cont '\\.\HDIMAGE\999996.000'
+docker exec -i cryptopro certmgr -inst -file /certificates/ecp/CA.cer -cont '\\.\HDIMAGE\999996.000'
 ```
 Если следующая ошибка, нужно узнать реальное название контейнера (см. выше):
 
@@ -107,13 +107,13 @@ Failed to open container \\.\HDIMAGE\<container>
 [ErrorCode: 0x00000002]
 Установить сертификат УЦ из-под пользователя root командой:
 ```shell
-docker exec -i cryptopro certmgr -inst -store uroot -file /path/to/file/CA.cer
+docker exec -i cryptopro certmgr -inst -store uroot -file /certificates/ecp/CA.cer
 ```
 Проверка успешности установки закрытого ключа
 ```shell
 docker exec -i cryptopro certmgr --list
 ```
-Удаление пин кода из контейнера
+Удаление пин кода из контейнера (выполнять лучше из BASH 'csptest -passwd -cont '\\.\HDIMAGE\Diachenk.000' -pass 12345678 -change "" ')
 ```shell
 docker exec -i cryptopro csptest -passwd -cont '\\.\HDIMAGE\Diachenk.000' -pass 12345678 -change "" 
 ```
