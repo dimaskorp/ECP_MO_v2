@@ -135,7 +135,7 @@ def send_mail(body):
     server.ehlo()
     server.starttls()
     server.ehlo()
-    server.login(fromaddr, 'Ykg6vdMsZfiDWXxKHBjS')
+    server.login(fromaddr, '********************')
     text = msg.as_string()
     server.sendmail(fromaddr, toaddr, text)
     server.quit()
