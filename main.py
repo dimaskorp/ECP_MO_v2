@@ -24,7 +24,7 @@ url_certificate = "https://ecp18.is-mis.ru/?c=EMD&m=loadEMDCertificateEditWindow
 
 param_autoriz = {
     "login": "ZainutdinovD",
-    "psw": "SadminD",
+    "psw": "*******",
     "swUserRegion": "",
     "swUserDBType": ""
 }
