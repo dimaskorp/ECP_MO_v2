@@ -24,7 +24,7 @@ url_certificate = "https://ecp18.is-mis.ru/?c=EMD&m=loadEMDCertificateEditWindow
 
 param_autoriz = {
     "login": "ZainutdinovD",
-    "psw": "*******",
+    "psw": "SadminD",
     "swUserRegion": "",
     "swUserDBType": ""
 }
@@ -77,7 +77,6 @@ def send_ecp_mo():
                 print(f"Всего документов: {len(list(list_object_ID))}")
                 signed_documents = 0
                 for x, i in enumerate(list_object_ID):
-                    # PySimpleGUI.one_line_progress_meter('ЕСП МО', x + 1, len(list(list_object_ID)), "Прогресс выполнения", orientation='h', no_button=True)
                     if i['IsSigned'] == '2':  # проверка стоит ли подпись врача
                         object_ID = i['EMDRegistry_ObjectID']
                         version_id = i['EMDVersion_id']
@@ -93,7 +92,11 @@ def send_ecp_mo():
                         param_signatures['Signatures_Hash'] = signatures_hash
                         param_signatures['EMDVersion_id'] = version_id
                         var = subprocess.run(f"docker exec cryptopro /scripts/sign {signatures_hash}", stdout=subprocess.PIPE).stdout.decode('utf-8')
-                        param_signatures["Signatures_SignedData"] = var
+                        if var:
+                            param_signatures["Signatures_SignedData"] = var
+                        else:
+                            send_mail(str(f"Внимание!!! Нет связи с Docker"))
+                            break
                         # param_signatures["Signatures_SignedData"] = signed_data.signed(signatures_hash)
                         message = session_rt_mis.post(url_signatures, data=param_signatures).json()
                         if message['success']:
@@ -101,7 +104,6 @@ def send_ecp_mo():
                             signed_documents += 1
                         else:
                             print(message['Error_Msg'])
-                            send_mail(message['Error_Msg'])
                         time.sleep(0.2)
                     else:
                         time.sleep(0.2)
@@ -133,7 +135,7 @@ def send_mail(body):
     server.ehlo()
     server.starttls()
     server.ehlo()
-    server.login(fromaddr, 'Ykg6vdMsZf**********')
+    server.login(fromaddr, 'Ykg6vdMsZfiDWXxKHBjS')
     text = msg.as_string()
     server.sendmail(fromaddr, toaddr, text)
     server.quit()

@@ -30,7 +30,7 @@
 
 Запустить:
 
-```
+```shell
 docker build --tag cryptopro_5 .
 ```
 
