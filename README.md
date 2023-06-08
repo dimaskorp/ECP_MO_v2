@@ -80,7 +80,7 @@ docker exec -i cryptopro cpconfig -license -view
 Добавление корневых сертификатов (под root) из файла <name>.p7b:
 
 ```shell
-docker exec -i cryptopro certmgr -inst -all -store uroot -file /certificates/<name>.p7b
+docker exec -i cryptopro certmgr -inst -all -store uroot -file /certificates/certs.p7b
 ```
 
 
@@ -88,19 +88,19 @@ docker exec -i cryptopro certmgr -inst -all -store uroot -file /certificates/<na
 
 Скопировать приватный ключ в хранилище (контейнер), где <username> - имя пользователя linux:
 ```shell
-docker exec -i cryptopro cp -R /certificates/ecp/999996.000 /var/opt/cprocsp/keys/root
+docker exec -i cryptopro cp -R /certificates/ecp/mo.000 /var/opt/cprocsp/keys/root
 ```
 Поставить «минимальные» права:
 ```shell
-docker exec -i cryptopro chmod 766 /var/opt/cprocsp/keys/root/999996.000/*
+docker exec -i cryptopro chmod 766 /var/opt/cprocsp/keys/root/mo.000/*
 ```
 Узнать реальное название контейнера:
 ```shell
-docker exec -i cryptopro csptest -keyset -enum_cont -verifycontext -fqcn
+docker exec -i cryptopro csptest -keyset -enum_cont -verifycontext -fqcn   # \\.\HDIMAGE\1021801592230 327155959
 ```
 Ассоциировать сертификат с контейнером, сертификат попадет в пользовательское хранилище My:
 ```shell
-docker exec -i cryptopro certmgr -inst -file /certificates/ecp/CA.cer -cont '\\.\HDIMAGE\999996.000'
+docker exec -i cryptopro certmgr -inst -file /certificates/ecp/mo2023.cer -cont '\\.\HDIMAGE\mo'
 ```
 Если следующая ошибка, нужно узнать реальное название контейнера (см. выше):
 
@@ -108,15 +108,15 @@ Failed to open container \\.\HDIMAGE\<container>
 [ErrorCode: 0x00000002]
 Установить сертификат УЦ из-под пользователя root командой:
 ```shell
-docker exec -i cryptopro certmgr -inst -store uroot -file /certificates/ecp/CA.cer
+docker exec -i cryptopro certmgr -inst -store root -file /certificates/ecp/mo2023.cer
 ```
 Проверка успешности установки закрытого ключа
 ```shell
 docker exec -i cryptopro certmgr --list
 ```
-Удаление пин кода из контейнера (выполнять лучше из BASH 'csptest -passwd -cont '\\.\HDIMAGE\Diachenk.000' -pass 12345678 -change "" ')
+Удаление пин кода из контейнера (выполнять лучше из BASH 'csptest -passwd -cont '\\.\HDIMAGE\Diachenk.000' -pass 12345678 -change "" ') (docker exec -it cryptopro bash )
 ```shell
-docker exec -i cryptopro csptest -passwd -cont '\\.\HDIMAGE\Diachenk.000' -pass 12345678 -change "" 
+docker exec -i cryptopro csptest -passwd -cont '\\.\HDIMAGE\mo' -pass 12345678 -change "" 
 ```
 
 ## Просмотр установленных сертификатов
@@ -137,10 +137,12 @@ docker exec -i cryptopro certmgr -list -store root
 
 ## Подписание документа
 
-hash строка передается  на `sign` файл в контейнере, в качестве команды - последовательность действий, и на `stdout` получим подписанную hash строку:
+hash строка передается на `sign` файл в контейнере, в качестве команды - последовательность действий, и на `stdout` получим подписанную hash строку:
 Команта прописана в файле main.py
 ```shell
 var = subprocess.run(f"docker exec cryptopro /scripts/sign {signatures_hash}", stdout=subprocess.PIPE).stdout.decode('utf-8')
 ```
 
 
+
+https://pushorigin.ru/cryptopro/cryptcp

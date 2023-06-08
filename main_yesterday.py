@@ -87,28 +87,38 @@ def send_ecp_mo():
                         param_sing_data['EMDRegistry_ObjectName'] = object_name
                         param_signatures['EMDRegistry_ObjectName'] = object_name
                         list_sing_data = session_rt_mis.post(url_sing_data, data=param_sing_data).json()
-                        signatures_hash = list_sing_data['toSign'][0]['hashBase64']
-                        version_id = list_sing_data['toSign'][0]['EMDVersion_id']
-                        param_signatures['Signatures_Hash'] = signatures_hash
-                        param_signatures['EMDVersion_id'] = version_id
-                        var = subprocess.run(f"docker exec cryptopro /scripts/sign {signatures_hash}", stdout=subprocess.PIPE).stdout.decode('utf-8')
-                        if var:
-                            param_signatures["Signatures_SignedData"] = var
+                        if list_sing_data['success']:
+                            signatures_hash = list_sing_data['toSign'][0]['hashBase64']
+                            version_id = list_sing_data['toSign'][0]['EMDVersion_id']
+                            param_signatures['Signatures_Hash'] = signatures_hash
+                            param_signatures['EMDVersion_id'] = version_id
+                            var = subprocess.run(f"docker exec cryptopro /scripts/sign {signatures_hash}", stdout=subprocess.PIPE).stdout.decode('utf-8')
+                            if var:
+                                param_signatures["Signatures_SignedData"] = var
+                            else:
+                                send_mail(str(f"Внимание!!! Нет связи с Docker"))
+                                break
+                            # param_signatures["Signatures_SignedData"] = signed_data.signed(signatures_hash)
+                            message = session_rt_mis.post(url_signatures, data=param_signatures).json()
+                            if message['success']:
+                                print(f"Документ №{x + 1} подписан")
+                                signed_documents += 1
+                            else:
+                                print(message['Error_Msg'])
+                            time.sleep(0.2)
                         else:
-                            send_mail(str(f"Внимание!!! Нет связи с Docker"))
-                            break
-                        # param_signatures["Signatures_SignedData"] = signed_data.signed(signatures_hash)
-                        message = session_rt_mis.post(url_signatures, data=param_signatures).json()
-                        if message['success']:
-                            print(f"Документ №{x + 1} подписан")
-                            signed_documents += 1
-                        else:
-                            print(message['Error_Msg'])
-                        time.sleep(0.2)
-                    else:
+                            print(list_sing_data['Error_Msg'])
+                            continue
+                    elif i['IsSigned'] == '1':
+                        print(f"Документ №{x + 1} номер: {str(i['Document_Num'])} не подписан надлижащим образом")
                         time.sleep(0.2)
                         continue
-                send_mail(str(f"Всего документов: {len(list(list_object_ID))}\n"
+                    elif i['IsSigned'] == '-1':
+                        print(f"Документ №{x + 1} номер: {str(i['Document_Num'])} удален и не может быть подписан")
+                        time.sleep(0.2)
+                        continue
+                print(str(f"Документов подписано: {str(signed_documents)}"))
+                send_mail(str(f"Всего документов за прошедший месяц: {len(list(list_object_ID))}\n"
                               f"из них подписано: {str(signed_documents)}"))
             else:
                 print(str(auth.status_code))
